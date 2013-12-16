@@ -78,6 +78,11 @@ import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
+<<<<<<< HEAD
+=======
+import com.android.systemui.statusbar.phone.NavigationBarOverlay;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
+>>>>>>> 47ec473... [SQUASHED] Lockscreen Notifications [1/2]
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
 import com.android.systemui.statusbar.appcirclesidebar.AppCircleSidebar;
@@ -580,6 +585,41 @@ public abstract class BaseStatusBar extends SystemUI implements
         mHandler.sendEmptyMessage(msg);
     }
 
+<<<<<<< HEAD
+=======
+    @Override
+    public void toggleScreenshot() {
+        int msg = MSG_TOGGLE_SCREENSHOT;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
+    public void toggleLastApp() {
+        int msg = MSG_TOGGLE_LAST_APP;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
+    public void toggleKillApp() {
+        int msg = MSG_TOGGLE_KILL_APP;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
+    public void setPieTriggerMask(int newMask, boolean lock) {
+        int msg = MSG_SET_PIE_TRIGGER_MASK;
+        mHandler.removeMessages(msg);
+        mHandler.obtainMessage(MSG_SET_PIE_TRIGGER_MASK,
+                newMask, lock ? 1 : 0, null).sendToTarget();
+    }
+
+    @Override
+    public void setButtonDrawable(int buttonId, int iconId) {}
+
+>>>>>>> 47ec473... [SQUASHED] Lockscreen Notifications [1/2]
     protected abstract WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams);
 

@@ -99,9 +99,16 @@ public class NavigationBarView extends LinearLayout {
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
 
+<<<<<<< HEAD
     private Drawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
     private Drawable mRecentIcon;
     private Drawable mRecentLandIcon;
+=======
+    private Drawable mBackIcon, mBackAltIcon;
+    private Drawable mRecentAltIcon, mRecentAltLandIcon;
+
+    boolean mWasNotifsButtonVisible = false;
+>>>>>>> 47ec473... [SQUASHED] Lockscreen Notifications [1/2]
 
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
@@ -183,10 +190,10 @@ public class NavigationBarView extends LinearLayout {
 
     private final OnTouchListener mCameraTouchListener = new OnTouchListener() {
         @Override
-        public boolean onTouch(View cameraButtonView, MotionEvent event) {
+        public boolean onTouch(View view, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    // disable search gesture while interacting with camera
+                    // disable search gesture while interacting with additional navbar button
                     mDelegateHelper.setDisabled(true);
                     mBarTransitions.setContentVisible(false);
                     break;
@@ -197,6 +204,13 @@ public class NavigationBarView extends LinearLayout {
                     break;
             }
             return KeyguardTouchDelegate.getInstance(getContext()).dispatch(event);
+        }
+    };
+
+    private final OnClickListener mNavBarClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            KeyguardTouchDelegate.getInstance(getContext()).dispatchButtonClick(0);
         }
     };
 
@@ -355,6 +369,7 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.camera_button);
     }
 
+<<<<<<< HEAD
     private void getIcons(Resources res) {
         mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
@@ -362,6 +377,23 @@ public class NavigationBarView extends LinearLayout {
         mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime_land);
         mRecentIcon = res.getDrawable(R.drawable.ic_sysbar_recent);
         mRecentLandIcon = res.getDrawable(R.drawable.ic_sysbar_recent_land);
+=======
+    // used for lockscreen notifications
+    public View getNotifsButton() {
+        return mCurrentView.findViewById(R.id.show_notifs);
+    }
+
+    @Override
+    public void setLayoutDirection(int layoutDirection) {
+        updateSettings();
+
+        super.setLayoutDirection(layoutDirection);
+    }
+
+    public void notifyScreenOn(boolean screenOn) {
+        mScreenOn = screenOn;
+        setDisabledFlags(mDisabledFlags, true);
+>>>>>>> 47ec473... [SQUASHED] Lockscreen Notifications [1/2]
     }
 
     public void updateResources() {
@@ -488,6 +520,21 @@ public class NavigationBarView extends LinearLayout {
         setDisabledFlags(mDisabledFlags, true);
     }
 
+<<<<<<< HEAD
+=======
+    public void setButtonDrawable(int buttonId, final int iconId) {
+        final ImageView iv = (ImageView)getNotifsButton();
+        mHandler.post(new Runnable() {
+            public void run() {
+                if (iconId == 1) iv.setImageResource(R.drawable.search_light_land);
+                else iv.setImageDrawable(mVertical ? mRecentAltLandIcon : mRecentAltIcon);
+                mWasNotifsButtonVisible = iconId != 0 && ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
+                setVisibleOrGone(getNotifsButton(), mWasNotifsButtonVisible);
+            }
+        });
+    }
+
+>>>>>>> 47ec473... [SQUASHED] Lockscreen Notifications [1/2]
     public void setDisabledFlags(int disabledFlags) {
         setDisabledFlags(disabledFlags, false);
     }
@@ -538,6 +585,15 @@ public class NavigationBarView extends LinearLayout {
 
         setVisibleOrGone(getSearchLight(), showSearch && mModLockDisabled);
         setVisibleOrGone(getCameraButton(), showCamera);
+
+        final boolean showSearch = disableHome && !disableSearch;
+        final boolean showNotifs = showSearch &&
+                Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.LOCKSCREEN_NOTIFICATIONS, 1) == 1 &&
+                Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.LOCKSCREEN_NOTIFICATIONS_PRIVACY_MODE, 0) == 0;
+
+        setVisibleOrGone(getNotifsButton(), showNotifs && mWasNotifsButtonVisible);
 
         mBarTransitions.applyBackButtonQuiescentAlpha(mBarTransitions.getMode(), true /*animate*/);
     }
@@ -653,11 +709,15 @@ public class NavigationBarView extends LinearLayout {
             }
 
             final View cameraButton = mRotatedViews[i].findViewById(R.id.camera_button);
+            final View notifsButton = mRotatedViews[i].findViewById(R.id.show_notifs);
             final View searchLight = mRotatedViews[i].findViewById(R.id.search_light);
             if (cameraButton != null) {
                 hasCamera = true;
                 cameraButton.setOnTouchListener(onTouchListener);
                 cameraButton.setOnClickListener(onClickListener);
+            }
+            if (notifsButton != null) {
+                notifsButton.setOnClickListener(mNavBarClickListener);
             }
             if (searchLight != null) {
                 searchLight.setOnClickListener(onClickListener);
@@ -766,7 +826,6 @@ public class NavigationBarView extends LinearLayout {
     }
     */
 
-
     private String getResourceName(int resId) {
         if (resId != 0) {
             final android.content.res.Resources res = mContext.getResources();
@@ -795,6 +854,53 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
+<<<<<<< HEAD
+=======
+    protected boolean hasNavringTargets() {
+        ArrayList<ButtonConfig> buttonsConfig =
+            ButtonsHelper.getNavRingConfig(mContext);
+        return buttonsConfig.size() > 0;
+    }
+
+    private void updateSettings() {
+        ContentResolver resolver = mContext.getContentResolver();
+
+        mNavBarButtonColor = Settings.System.getIntForUser(resolver,
+                Settings.System.NAVIGATION_BAR_BUTTON_TINT, -2, UserHandle.USER_CURRENT);
+
+        if (mNavBarButtonColor == -2) {
+            mNavBarButtonColor = mContext.getResources()
+                    .getColor(R.color.navigationbar_button_default_color);
+        }
+
+        mNavBarButtonColorMode = Settings.System.getIntForUser(resolver,
+                Settings.System.NAVIGATION_BAR_BUTTON_TINT_MODE, 0, UserHandle.USER_CURRENT);
+
+        mButtonsConfig = ButtonsHelper.getNavBarConfigWithDescription(
+                mContext, "shortcut_action_values", "shortcut_action_entries");
+
+        mMenuSetting = Settings.System.getIntForUser(resolver,
+                Settings.System.MENU_LOCATION, SHOW_RIGHT_MENU,
+                UserHandle.USER_CURRENT);
+
+        mMenuVisibility = Settings.System.getIntForUser(resolver,
+                Settings.System.MENU_VISIBILITY, MENU_VISIBILITY_SYSTEM,
+                UserHandle.USER_CURRENT);
+
+        // construct the navigationbar
+        makeBar();
+    }
+
+    public void setForgroundColor(Drawable drawable) {
+        if (mRot0 != null) {
+            mRot0.setForeground(drawable);
+        }
+        if (mRot90 != null) {
+            mRot90.setForeground(drawable);
+        }
+    }
+
+>>>>>>> 47ec473... [SQUASHED] Lockscreen Notifications [1/2]
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NavigationBarView {");
         final Rect r = new Rect();
@@ -846,6 +952,7 @@ public class NavigationBarView extends LinearLayout {
         }
         pw.println();
     }
+<<<<<<< HEAD
 
     private static Bundle getApplicationMetadata(Context context, String pkg) {
         if (pkg != null) {
@@ -893,4 +1000,6 @@ public class NavigationBarView extends LinearLayout {
             setDisabledFlags(mDisabledFlags, true /* force */);
         }
     }
+=======
+>>>>>>> 47ec473... [SQUASHED] Lockscreen Notifications [1/2]
 }
