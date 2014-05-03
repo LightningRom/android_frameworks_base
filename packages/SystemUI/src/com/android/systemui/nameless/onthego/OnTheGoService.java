@@ -44,6 +44,11 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
+<<<<<<< HEAD
+=======
+import android.util.Log;
+import android.view.Surface;
+>>>>>>> cedc083... On-The-Go: handle display orientation changes
 import android.view.TextureView;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -211,10 +216,18 @@ public class OnTheGoService extends Service implements FaceDetectionListener {
         }
     }
 
+<<<<<<< HEAD
     private void setupViews() {
         int cameraType = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.ON_THE_GO_CAMERA,
                 0);
+=======
+    private void setupViews(final boolean isRestarting) {
+        logDebug("Setup Views, restarting: " + (isRestarting ? "true" : "false"));
+
+        final int cameraType = Settings.System.getInt(getContentResolver(),
+                Settings.System.ON_THE_GO_CAMERA, 0);
+>>>>>>> cedc083... On-The-Go: handle display orientation changes
 
         boolean success = true;
         try {
@@ -225,6 +238,7 @@ public class OnTheGoService extends Service implements FaceDetectionListener {
             success = false;
         }
 
+<<<<<<< HEAD
         if (!success) {
             return;
         }
@@ -239,12 +253,16 @@ public class OnTheGoService extends Service implements FaceDetectionListener {
         );
 
         final TextureView mTextureView = new TextureView(mContext);
+=======
+        final WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+        final TextureView mTextureView = new TextureView(this);
+>>>>>>> cedc083... On-The-Go: handle display orientation changes
         mTextureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i2) {
                 try {
                     if (mCamera != null) {
-                        mCamera.setDisplayOrientation(90);
+                        mCamera.setDisplayOrientation(wm.getDefaultDisplay().getRotation() + 90);
                         mCamera.setPreviewTexture(surfaceTexture);
                         mCamera.startPreview();
                         try {
@@ -261,6 +279,7 @@ public class OnTheGoService extends Service implements FaceDetectionListener {
 
             @Override
             public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i2) {
+                setCameraDisplayOrientation();
             }
 
             @Override
@@ -279,7 +298,22 @@ public class OnTheGoService extends Service implements FaceDetectionListener {
                         ViewGroup.LayoutParams.MATCH_PARENT)
         );
         mOverlay.addView(mTextureView);
+<<<<<<< HEAD
         mWindowManager.addView(mOverlay, params);
+=======
+
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                        WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                        WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED |
+                        WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION |
+                        WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                PixelFormat.TRANSLUCENT
+        );
+        wm.addView(mOverlay, params);
+>>>>>>> cedc083... On-The-Go: handle display orientation changes
 
         toggleOnTheGoAlpha();
     }
@@ -334,12 +368,54 @@ public class OnTheGoService extends Service implements FaceDetectionListener {
         }
     }
 
+<<<<<<< HEAD
     private PendingIntent makeServiceIntent(Context context, String action) {
         Intent intent = new Intent(context, OnTheGoReceiver.class);
         intent.setAction(action);
         return PendingIntent.getBroadcast(
                 context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
+=======
+    private void setCameraDisplayOrientation() {
+        if (mCamera == null) return;
+
+        final Camera.CameraInfo info = new Camera.CameraInfo();
+        final int cameraType = Settings.System.getInt(getContentResolver(),
+                Settings.System.ON_THE_GO_CAMERA, 0);
+        Camera.getCameraInfo(cameraType, info);
+        final int rotation = ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay().getRotation();
+
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
+        }
+
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {  // back-facing
+            result = (info.orientation - degrees + 360) % 360;
+        }
+        mCamera.setDisplayOrientation(result);
+    }
+
+    private final        Object  mShakeLock     = new Object();
+    private final static int     SHAKE_TIMEOUT  = 1000;
+    private              boolean mIsShakeLocked = false;
+>>>>>>> cedc083... On-The-Go: handle display orientation changes
 
     private void createNotification(int type) {
         mNotificationManager.cancel(ONTHEGO_NOTIFICATION_ID);
