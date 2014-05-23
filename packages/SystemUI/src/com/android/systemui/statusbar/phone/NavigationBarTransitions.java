@@ -89,10 +89,6 @@ public final class NavigationBarTransitions extends BarTransitions {
         setKeyButtonViewQuiescentAlpha(NavbarEditor.NAVBAR_MENU_BIG, alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getSearchLight(), KEYGUARD_QUIESCENT_ALPHA, animate);
         setKeyButtonViewQuiescentAlpha(mView.getCameraButton(), KEYGUARD_QUIESCENT_ALPHA, animate);
-<<<<<<< HEAD
-=======
-        setKeyButtonViewQuiescentAlpha(mView.getNotifsButton(), KEYGUARD_QUIESCENT_ALPHA, animate);
->>>>>>> 47ec473... [SQUASHED] Lockscreen Notifications [1/2]
         applyBackButtonQuiescentAlpha(mode, animate);
 
         // apply to lights out
@@ -130,7 +126,6 @@ public final class NavigationBarTransitions extends BarTransitions {
         if (backAlpha > 0) {
             setKeyButtonViewQuiescentAlpha(NavbarEditor.NAVBAR_BACK, backAlpha, animate);
         }
-<<<<<<< HEAD
     }
 
     public void applyTransparent(boolean sticky) {
@@ -141,11 +136,6 @@ public final class NavigationBarTransitions extends BarTransitions {
             } else {
                 transitionTo(MODE_TRANSPARENT, false);
             }
-=======
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getNotifsButton());
-        if (backAlpha > 0) {
-            setKeyButtonViewQuiescentAlpha(back, backAlpha, animate);
->>>>>>> 47ec473... [SQUASHED] Lockscreen Notifications [1/2]
         }
     }
 
@@ -160,7 +150,6 @@ public final class NavigationBarTransitions extends BarTransitions {
     public void setContentVisible(boolean visible) {
         final float alpha = visible ? 1 : 0;
         fadeContent(mView.getCameraButton(), alpha);
-        fadeContent(mView.getNotifsButton(), alpha);
         fadeContent(mView.getSearchLight(), alpha);
     }
 
